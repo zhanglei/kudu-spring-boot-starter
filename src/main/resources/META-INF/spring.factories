@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.fulihui.stater.kudu.config.KuduClientAutoConfiguration

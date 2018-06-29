@@ -1,0 +1,28 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.sj4axao.stater.kudu.config.KuduProperties",
+      "name": "kudu",
+      "type": "com.sj4axao.stater.kudu.config.KuduProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.sj4axao.stater.kudu.config.KuduProperties",
+      "name": "kudu.default-data-base",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.sj4axao.stater.kudu.config.KuduProperties",
+      "name": "kudu.kudu-address",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.sj4axao.stater.kudu.config.KuduProperties",
+      "defaultValue": 35,
+      "name": "kudu.worker-id",
+      "type": "java.lang.Long"
+    }
+  ]
+}

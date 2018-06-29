@@ -1,90 +1,38 @@
-package com.fulihui.stater.kudu.client;
+package com.sj4axao.stater.kudu.client;
 
-import com.fulihui.stater.kudu.config.KuduProperties;
-import com.fulihui.stater.kudu.helper.IdGenerator;
-import com.fulihui.stater.kudu.helper.KuduUtilHelper;
+import com.sj4axao.stater.kudu.exception.DefaultDBNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
 import org.apache.kudu.client.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: LiuJie
  * @version: 2018/4/19 11:11
- * @description: 对外暴露的功能，适用于 impala 建的kudu表
+ * @description: 对外暴露的功能，适用于 impala 建的 kudu 表
  */
-
-public class KuduUtil {
-
-    private static final Logger logger = LoggerFactory.getLogger(KuduUtil.class);
-
-    @Autowired
-    private KuduSession kuduSession;
-    @Autowired
-    private KuduClient kuduClient;
-    @Autowired
-    private KuduProperties kuduProperties;
+@Slf4j
+public class KuduImpalaTemplate extends BaseTemplate {
 
     private static final String TABLE_PREFIX = "impala::";
-    private static final String DEFAULT_DB_NAME = "wgj";
     private static final String DOT = ".";
-
-    private static Map<String, KuduTable> tables ;
-    private KuduUtilHelper kuduUtilHelper ;
-    private IdGenerator idGenerator;
-
-    public KuduUtil(){
-        tables = new HashMap<>();
-        kuduUtilHelper = new KuduUtilHelper();
-    }
+    private String defaultDataBase;
 
     @PostConstruct
     public void init(){
-        // 初始化 id 生成器
-        Long wordId = kuduProperties.getWorkerId();
-        if(wordId==null){
-            wordId = 35L;  // 此处的 35 没有什么特殊意义，就是随便给个默认值，任性没办法
-        }
-        logger.info("workId = {}",wordId);
-        idGenerator = new IdGenerator(wordId);
-    }
-
-    /**
-     * 返回 不重复的 Long 类型 id
-     * @return
-     */
-    public long getId(){
-        return idGenerator.nextId();
-    }
-
-    /**
-     * 获取table列表
-     * 数据库是Impala的定义，kudu没有的，只是表名不同，
-     * 所以
-     * @return 所有库的所有表
-     */
-    public ListTablesResponse getTables(){
-        try {
-            return kuduClient.getTablesList();
-        } catch (KuduException e) {
-            e.printStackTrace();
+        super.init();
+        defaultDataBase = Optional.ofNullable(kuduProperties.getDefaultDataBase()).orElseGet(()->{
+            log.warn("注意:kudu.default-data-base 属性未配置,所有 kudu 操作都必须在方法中指定 dbName");
             return null;
-        }
-
+        });
     }
 
     public KuduTable getTable(String tableName) throws KuduException {
-        return getTable(DEFAULT_DB_NAME,tableName);
+        return getTable(getDefaultDataBase(),tableName);
     }
 
     public KuduTable getTable(String dbName ,String tableName) throws KuduException {
@@ -98,7 +46,7 @@ public class KuduUtil {
     }
 
     public Long scanId(String table,Map<String,String> args) throws KuduException {
-        return scanId(DEFAULT_DB_NAME,table,args);
+        return scanId(getDefaultDataBase(),table,args);
     }
     public Long scanId(String dbName,String table,Map<String,String> args) throws KuduException {
 
@@ -134,18 +82,18 @@ public class KuduUtil {
     /* ***************************** 构建operation对象 *******************************************************************/
 
     public Insert createInsert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createInsert(DEFAULT_DB_NAME,table,data);
+        return createInsert(getDefaultDataBase(),table,data);
     }
 
     public Insert createInsert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         KuduTable ktable = getTable(dbName,table);
         Insert insert = ktable.newInsert();
-        kuduUtilHelper.fillRow(data, ktable, insert);
+        kuduUtil.fillRow(data, ktable, insert);
         return insert;
     }
 
     public Update createUpdate(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createUpdate(DEFAULT_DB_NAME,table,data);
+        return createUpdate(getDefaultDataBase(),table,data);
     }
 
     /**
@@ -159,7 +107,7 @@ public class KuduUtil {
     public Update createUpdate(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         KuduTable ktable = getTable(dbName,table);
         Update update = ktable.newUpdate();
-        kuduUtilHelper.fillRow(data, ktable, update);
+        kuduUtil.fillRow(data, ktable, update);
         return update;
     }
 
@@ -171,12 +119,12 @@ public class KuduUtil {
      * @throws KuduException
      */
     public Delete createDelete(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createDelete(DEFAULT_DB_NAME,table,data);
+        return createDelete(getDefaultDataBase(),table,data);
     }
     public Delete createDelete(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         KuduTable ktable = getTable(dbName,table);
         Delete delete = ktable.newDelete();
-        kuduUtilHelper.fillRow(data, ktable, delete);
+        kuduUtil.fillRow(data, ktable, delete);
         return delete;
     }
 
@@ -187,12 +135,12 @@ public class KuduUtil {
      * @throws KuduException
      */
     public Upsert createUpsert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createUpsert(DEFAULT_DB_NAME,table,data);
+        return createUpsert(getDefaultDataBase(),table,data);
     }
     public Upsert createUpsert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         KuduTable ktable = getTable(dbName,table);
         Upsert upsert = ktable.newUpsert();
-        kuduUtilHelper.fillRow(data, ktable, upsert);
+        kuduUtil.fillRow(data, ktable, upsert);
         return upsert;
     }
 
@@ -205,7 +153,7 @@ public class KuduUtil {
      * @throws KuduException
      */
     public void delete(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        delete(DEFAULT_DB_NAME,table,data);
+        delete(getDefaultDataBase(),table,data);
     }
     public void delete(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         Delete delete = createDelete(dbName,table, data);
@@ -220,7 +168,7 @@ public class KuduUtil {
      * @throws KuduException
      */
     public void insert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        insert(DEFAULT_DB_NAME,table,data);
+        insert(getDefaultDataBase(),table,data);
     }
     public void insert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         Insert insert = createInsert(dbName,table, data);
@@ -235,7 +183,7 @@ public class KuduUtil {
      * @throws KuduException
      */
     public void update(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        update(DEFAULT_DB_NAME,table,data);
+        update(getDefaultDataBase(),table,data);
     }
     public void update(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         Update update = createUpdate(dbName,table, data);
@@ -244,7 +192,7 @@ public class KuduUtil {
     }
 
     public void upsert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        upsert(DEFAULT_DB_NAME,table,data);
+        upsert(getDefaultDataBase(),table,data);
     }
     public void upsert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
         Upsert upsert = createUpsert(dbName,table, data);
@@ -273,14 +221,7 @@ public class KuduUtil {
         kuduSession.flush();
     }
 
-    @PreDestroy
-    public void dedtroy() {
-        try {
-            kuduSession.close();
-            kuduClient.close();
-            logger.info("kudu 客户端注销完成。");
-        } catch (KuduException e) {
-            e.printStackTrace();
-        }
+    public String getDefaultDataBase() {
+        return Optional.ofNullable(defaultDataBase).orElseThrow(() -> new DefaultDBNotFoundException("kudu.default-data-base 属性未配置"));
     }
 }

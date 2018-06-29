@@ -1,4 +1,4 @@
-package com.fulihui.stater.kudu.helper;
+package com.sj4axao.stater.kudu.utils;
 
 import com.alibaba.fastjson.util.TypeUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
@@ -12,9 +12,9 @@ import org.apache.kudu.client.PartialRow;
 /**
  * @author: LiuJie
  * @version: 2018/5/7 10:43
- * @description:
+ * @description: kudu 操作封装
  */
-public class KuduUtilHelper {
+public class KuduUtil {
 
 
     /**

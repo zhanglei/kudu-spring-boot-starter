@@ -1,7 +1,10 @@
 spring:
   application:
-    name: open-common
+    name: kudu-spring-boot-starter
 
 kudu:
-  kuduAddress: 192.168.1.131,192.168.1.132,192.168.1.111
-  workerId: 1
+  # 必要
+  kudu-address: 192.168.1.131,192.168.1.132,192.168.1.111
+  default-data-base: test
+  # 如果多节点使用getId方法获取全局唯一id，最好配，默认 35，取值范围 [0,1024）
+  worker-id: 1

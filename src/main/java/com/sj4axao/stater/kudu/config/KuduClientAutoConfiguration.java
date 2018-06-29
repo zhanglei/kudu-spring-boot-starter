@@ -1,7 +1,6 @@
-package com.fulihui.stater.kudu.config;
+package com.sj4axao.stater.kudu.config;
 
-import com.fulihui.stater.kudu.client.KuduUtil;
-import com.fulihui.stater.kudu.helper.IdGenerator;
+import com.sj4axao.stater.kudu.client.KuduImpalaTemplate;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduSession;
 import org.apache.kudu.client.SessionConfiguration;
@@ -32,7 +31,7 @@ public class KuduClientAutoConfiguration {
         return new KuduProperties();
     }
 
-    @Bean
+    @Bean(destroyMethod = "close")
     @ConditionalOnBean(KuduProperties.class)
     public KuduClient kuduClient(@Qualifier("kuduProperties")KuduProperties kuduProperties){
         List<String> masteraddr = Arrays.asList(kuduProperties.getKuduAddress().split(","));
@@ -41,7 +40,7 @@ public class KuduClientAutoConfiguration {
         return  new KuduClient.KuduClientBuilder(masteraddr).defaultSocketReadTimeoutMs(30002).defaultOperationTimeoutMs(30001).build();
     }
 
-    @Bean
+    @Bean(destroyMethod = "close")
     @ConditionalOnBean(KuduClient.class)
     public KuduSession kuduSession(@Qualifier("kuduClient")KuduClient kuduClient){
 
@@ -55,8 +54,8 @@ public class KuduClientAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(KuduSession.class)
-    public KuduUtil kuduUtil(){
-        return new KuduUtil();
+    public KuduImpalaTemplate KuduImpalaTemplate(){
+        return new KuduImpalaTemplate();
     }
 
 }

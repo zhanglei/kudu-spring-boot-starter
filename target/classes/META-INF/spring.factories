@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.sj4axao.stater.kudu.config.KuduClientAutoConfiguration

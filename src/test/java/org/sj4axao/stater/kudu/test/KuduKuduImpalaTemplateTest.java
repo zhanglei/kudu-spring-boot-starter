@@ -1,8 +1,9 @@
-package com.sj4axao.stater.kudu.test;
+package org.sj4axao.stater.kudu.test;
 
-import com.sj4axao.stater.kudu.demo.DemoApplication;
-import com.sj4axao.stater.kudu.demo.bean.User;
-import com.sj4axao.stater.kudu.demo.dao.KuduImpalaTemplateDao;
+import org.sj4axao.stater.kudu.client.KuduImpalaTemplate;
+import org.sj4axao.stater.kudu.demo.DemoApplication;
+import org.sj4axao.stater.kudu.demo.bean.User;
+import org.sj4axao.stater.kudu.demo.dao.KuduImpalaTemplateDao;
 import org.apache.kudu.client.KuduException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,9 +18,11 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = DemoApplication.class)
-public class KuduImpalaTemplateTest {
+public class KuduKuduImpalaTemplateTest {
     @Autowired
     KuduImpalaTemplateDao kuduImpalaTemplateDao;
+    @Autowired
+    KuduImpalaTemplate kuduKuduImpalaTemplate;
 
     @Test
     public void insertDefaultDB() throws KuduException {
@@ -33,4 +36,10 @@ public class KuduImpalaTemplateTest {
     public void tableList() throws KuduException {
         kuduImpalaTemplateDao.getTableList().forEach(s-> System.out.println(s));
     }
+
+    @Test
+    public void getId(){
+        System.out.println(kuduKuduImpalaTemplate.getId());
+    }
+
 }

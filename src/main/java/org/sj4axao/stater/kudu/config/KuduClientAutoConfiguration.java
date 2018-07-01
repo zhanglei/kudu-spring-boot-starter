@@ -1,9 +1,10 @@
-package com.sj4axao.stater.kudu.config;
+package org.sj4axao.stater.kudu.config;
 
-import com.sj4axao.stater.kudu.client.KuduImpalaTemplate;
+import org.sj4axao.stater.kudu.client.KuduImpalaTemplate;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduSession;
 import org.apache.kudu.client.SessionConfiguration;
+import org.sj4axao.stater.kudu.client.KuduTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,6 +57,12 @@ public class KuduClientAutoConfiguration {
     @ConditionalOnBean(KuduSession.class)
     public KuduImpalaTemplate KuduImpalaTemplate(){
         return new KuduImpalaTemplate();
+    }
+
+    @Bean
+    @ConditionalOnBean(KuduSession.class)
+    public KuduTemplate KuduTemplate(){
+        return new KuduTemplate();
     }
 
 }

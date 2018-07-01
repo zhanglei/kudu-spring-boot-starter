@@ -1,4 +1,4 @@
-package com.sj4axao.stater.kudu.utils;
+package org.sj4axao.stater.kudu.utils;
 
 
 /**

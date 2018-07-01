@@ -1,6 +1,6 @@
-package com.sj4axao.stater.kudu.client;
+package org.sj4axao.stater.kudu.client;
 
-import com.sj4axao.stater.kudu.exception.DefaultDBNotFoundException;
+import org.sj4axao.stater.kudu.exception.DefaultDBNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
@@ -30,21 +30,18 @@ public class KuduImpalaTemplate extends BaseTemplate {
             return null;
         });
     }
-
+    @Override
     public KuduTable getTable(String tableName) throws KuduException {
-        return getTable(getDefaultDataBase(),tableName);
+        return this.getTable(getDefaultDataBase(),tableName);
     }
 
     public KuduTable getTable(String dbName ,String tableName) throws KuduException {
-        String finalTableName = TABLE_PREFIX + dbName + DOT + tableName;
-        KuduTable table = tables.get(finalTableName);
-        if (table == null) {
-            table = kuduClient.openTable(finalTableName);
-            tables.put(tableName, table);
-        }
-        return table;
+        String finalTableName = getFinalTableName(dbName, tableName);
+        return super.getTable(finalTableName);
     }
 
+
+    // todo scanId 不具有通用性，改为 scan 传 字段 List 或对象,现在先不动。
     public Long scanId(String table,Map<String,String> args) throws KuduException {
         return scanId(getDefaultDataBase(),table,args);
     }
@@ -81,19 +78,19 @@ public class KuduImpalaTemplate extends BaseTemplate {
 
     /* ***************************** 构建operation对象 *******************************************************************/
 
+    @Override
     public Insert createInsert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createInsert(getDefaultDataBase(),table,data);
+        return this.createInsert(getDefaultDataBase(),table,data);
     }
 
     public Insert createInsert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        KuduTable ktable = getTable(dbName,table);
-        Insert insert = ktable.newInsert();
-        kuduUtil.fillRow(data, ktable, insert);
-        return insert;
+
+        return super.createInsert(getFinalTableName(dbName,table),data);
     }
 
+    @Override
     public Update createUpdate(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createUpdate(getDefaultDataBase(),table,data);
+        return this.createUpdate(getDefaultDataBase(),table,data);
     }
 
     /**
@@ -105,10 +102,7 @@ public class KuduImpalaTemplate extends BaseTemplate {
      * @throws KuduException
      */
     public Update createUpdate(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        KuduTable ktable = getTable(dbName,table);
-        Update update = ktable.newUpdate();
-        kuduUtil.fillRow(data, ktable, update);
-        return update;
+        return super.createUpdate(getFinalTableName(dbName,table),data);
     }
 
     /**
@@ -118,14 +112,12 @@ public class KuduImpalaTemplate extends BaseTemplate {
      * @return
      * @throws KuduException
      */
+    @Override
     public Delete createDelete(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createDelete(getDefaultDataBase(),table,data);
+        return this.createDelete(getDefaultDataBase(),table,data);
     }
     public Delete createDelete(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        KuduTable ktable = getTable(dbName,table);
-        Delete delete = ktable.newDelete();
-        kuduUtil.fillRow(data, ktable, delete);
-        return delete;
+        return super.createDelete(getFinalTableName(dbName,table),data);
     }
 
     /**
@@ -134,14 +126,12 @@ public class KuduImpalaTemplate extends BaseTemplate {
      * @return
      * @throws KuduException
      */
+    @Override
     public Upsert createUpsert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        return createUpsert(getDefaultDataBase(),table,data);
+        return this.createUpsert(getDefaultDataBase(),table,data);
     }
     public Upsert createUpsert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        KuduTable ktable = getTable(dbName,table);
-        Upsert upsert = ktable.newUpsert();
-        kuduUtil.fillRow(data, ktable, upsert);
-        return upsert;
+        return super.createUpsert(this.getFinalTableName(dbName,table),data);
     }
 
     /* *********************** 单条操作 **********************************************************************************/
@@ -152,13 +142,12 @@ public class KuduImpalaTemplate extends BaseTemplate {
      * @param data
      * @throws KuduException
      */
+    @Override
     public void delete(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        delete(getDefaultDataBase(),table,data);
+        this.delete(getDefaultDataBase(),table,data);
     }
     public void delete(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        Delete delete = createDelete(dbName,table, data);
-        kuduSession.apply(delete);
-        kuduSession.flush();
+        super.delete(getFinalTableName(dbName,table),data);
     }
 
     /**
@@ -168,12 +157,10 @@ public class KuduImpalaTemplate extends BaseTemplate {
      * @throws KuduException
      */
     public void insert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        insert(getDefaultDataBase(),table,data);
+        this.insert(getDefaultDataBase(),table,data);
     }
     public void insert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        Insert insert = createInsert(dbName,table, data);
-        kuduSession.apply(insert);
-        kuduSession.flush();
+        super.insert(getFinalTableName(dbName,table),data);
     }
 
     /**
@@ -183,45 +170,28 @@ public class KuduImpalaTemplate extends BaseTemplate {
      * @throws KuduException
      */
     public void update(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        update(getDefaultDataBase(),table,data);
+        this.update(getDefaultDataBase(),table,data);
     }
     public void update(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        Update update = createUpdate(dbName,table, data);
-        kuduSession.apply(update);
-        kuduSession.flush();
+        super.update(getFinalTableName(dbName,table),data);
     }
 
     public void upsert(String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        upsert(getDefaultDataBase(),table,data);
+        this.upsert(getDefaultDataBase(),table,data);
     }
     public void upsert(String dbName,String table, CaseInsensitiveMap<String, Object> data) throws KuduException {
-        Upsert upsert = createUpsert(dbName,table, data);
-        kuduSession.apply(upsert);
-        kuduSession.flush();
+        super.upsert(getFinalTableName(dbName,table),data);
     }
 
 
-    /**
-     * 批量提交
-     * @param operations
-     * @throws KuduException
-     */
-    public void apply(List<Operation> operations) throws KuduException {
-        int index = 0;
-        for(Operation operation : operations){
-            try {
-                kuduSession.apply(operation);
-                if( ++index % 8 == 0){
-                    kuduSession.flush();
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-        kuduSession.flush();
-    }
 
     public String getDefaultDataBase() {
-        return Optional.ofNullable(defaultDataBase).orElseThrow(() -> new DefaultDBNotFoundException("kudu.default-data-base 属性未配置"));
+        return Optional.ofNullable(defaultDataBase)
+                .orElseThrow(() -> new DefaultDBNotFoundException(
+                        "kudu.default-data-base 属性未配置,KuduImpalaTemplate用于操作Impala创建管理的kudu表，需要设置impala的默认数据库"));
+    }
+
+    private String getFinalTableName(String dbName, String tableName) {
+        return TABLE_PREFIX + dbName + DOT + tableName;
     }
 }

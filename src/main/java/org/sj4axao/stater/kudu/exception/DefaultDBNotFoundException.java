@@ -1,4 +1,4 @@
-package com.sj4axao.stater.kudu.exception;
+package org.sj4axao.stater.kudu.exception;
 
 /**
  * @author: LiuJie

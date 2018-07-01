@@ -1,4 +1,4 @@
-package com.sj4axao.stater.kudu.demo.bean;
+package org.sj4axao.stater.kudu.demo.bean;
 
 import lombok.Data;
 

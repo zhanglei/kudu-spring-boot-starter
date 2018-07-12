@@ -14,13 +14,14 @@ kudu:
 kudu:
   # 雪花算法节点id 取值 [0,1023] after v1.1.0 默认值35
   workerId: 0
+  
   #使用KuduImpalaTemplate来操作Impala创建的Kudu表则最好设置默认DB，否则必须使用带dbName参数的重载方法
   default-data-base: test
 ```
 **注入:**
 ```java
 //todo
-// 当然可以直接注入 KuduClient 和 KuduSession 来使用原生 api,因为我把这两个对象也交给了Spring
+// 当然可以直接注入 KuduClient 和 KuduSession 来使用原生 api
 ```
 
 ---

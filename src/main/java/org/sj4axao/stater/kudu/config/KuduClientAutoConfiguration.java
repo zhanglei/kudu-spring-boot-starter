@@ -1,10 +1,12 @@
 package org.sj4axao.stater.kudu.config;
 
-import org.sj4axao.stater.kudu.client.KuduImpalaTemplate;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduSession;
 import org.apache.kudu.client.SessionConfiguration;
+import org.sj4axao.stater.kudu.client.KuduImpalaTemplate;
 import org.sj4axao.stater.kudu.client.KuduTemplate;
+import org.sj4axao.stater.kudu.client.impl.PlainKuduImpalaTemplate;
+import org.sj4axao.stater.kudu.client.impl.PlainKuduTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,13 +40,12 @@ public class KuduClientAutoConfiguration {
         List<String> masteraddr = Arrays.asList(kuduProperties.getKuduAddress().split(","));
         logger.info("kudu实例化,servers:{}",masteraddr);
         //创建kudu的数据库链接
-        return  new KuduClient.KuduClientBuilder(masteraddr).defaultSocketReadTimeoutMs(30002).defaultOperationTimeoutMs(30001).build();
+        return new KuduClient.KuduClientBuilder(masteraddr).defaultSocketReadTimeoutMs(30002).defaultOperationTimeoutMs(30001).build();
     }
 
     @Bean(destroyMethod = "close")
     @ConditionalOnBean(KuduClient.class)
     public KuduSession kuduSession(@Qualifier("kuduClient")KuduClient kuduClient){
-
         KuduSession kuduSession  = kuduClient.newSession();
         //
         kuduSession.setFlushMode(SessionConfiguration.FlushMode.MANUAL_FLUSH);
@@ -55,14 +56,16 @@ public class KuduClientAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(KuduSession.class)
-    public KuduImpalaTemplate KuduImpalaTemplate(){
-        return new KuduImpalaTemplate();
+    public KuduTemplate KuduTemplate(KuduClient kuduClient, KuduSession kuduSession, KuduProperties kuduProperties){
+        return new PlainKuduTemplate(kuduClient,kuduSession,kuduProperties);
     }
 
     @Bean
     @ConditionalOnBean(KuduSession.class)
-    public KuduTemplate KuduTemplate(){
-        return new KuduTemplate();
+    public KuduImpalaTemplate KuduImpalaTemplate(KuduTemplate kuduTemplate){
+        return new PlainKuduImpalaTemplate(kuduTemplate);
     }
+
+
 
 }

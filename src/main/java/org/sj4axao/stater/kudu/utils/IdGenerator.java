@@ -44,11 +44,7 @@ public class IdGenerator {
             this.sequence = 0;
         }
         if (timestamp < this.lastTimestamp) {
-            try {
-                throw new Exception(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", this.lastTimestamp - timestamp));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            throw new RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", this.lastTimestamp - timestamp));
         }
         this.lastTimestamp = timestamp;
         long nextId = ((timestamp - twepoch << timestampLeftShift)) | (this.workerId << workerIdShift) | (this.sequence);

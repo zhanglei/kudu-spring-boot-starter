@@ -48,7 +48,7 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
     public KuduTable getTable(String tableName) throws KuduException {
         return this.getTable(getDefaultDataBase(),tableName);
     }
-
+    @Override
     public KuduTable getTable(String dbName ,String tableName) throws KuduException {
         String finalTableName = getFinalTableName(dbName, tableName);
         return kuduTemplate.getTable(finalTableName);
@@ -96,7 +96,7 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
     public Insert createInsert(String table, Object data) throws KuduException {
         return this.createInsert(getDefaultDataBase(),table,data);
     }
-
+    @Override
     public Insert createInsert(String dbName,String table, Object data) throws KuduException {
 
         return kuduTemplate.createInsert(getFinalTableName(dbName,table),data);
@@ -115,6 +115,7 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
      * @return
      * @throws KuduException
      */
+    @Override
     public Update createUpdate(String dbName,String table, Object data) throws KuduException {
         return kuduTemplate.createUpdate(getFinalTableName(dbName,table),data);
     }
@@ -130,6 +131,7 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
     public Delete createDelete(String table, Object data) throws KuduException {
         return this.createDelete(getDefaultDataBase(),table,data);
     }
+    @Override
     public Delete createDelete(String dbName,String table, Object data) throws KuduException {
         return kuduTemplate.createDelete(getFinalTableName(dbName,table),data);
     }
@@ -145,6 +147,7 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
         return this.createUpsert(getDefaultDataBase(),table,data);
     }
 
+    @Override
     public Upsert createUpsert(String dbName,String table, Object data) throws KuduException {
         return kuduTemplate.createUpsert(this.getFinalTableName(dbName,table),data);
     }
@@ -171,6 +174,7 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
     public void delete(String table, Object data) throws KuduException {
         this.delete(getDefaultDataBase(),table,data);
     }
+    @Override
     public void delete(String dbName,String table, Object data) throws KuduException {
         kuduTemplate.delete(getFinalTableName(dbName,table),data);
     }
@@ -181,10 +185,12 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
      * @param data
      * @throws KuduException
      */
+    @Override
     public void insert(String table, Object data) throws KuduException {
         this.insert(getDefaultDataBase(),table,data);
     }
 
+    @Override
     public void insert(String dbName,String table, Object data) throws KuduException {
         kuduTemplate.insert(getFinalTableName(dbName,table),data);
     }
@@ -195,22 +201,27 @@ public class PlainKuduImpalaTemplate implements KuduImpalaTemplate {
      * @param data
      * @throws KuduException
      */
+    @Override
     public void update(String table, Object data) throws KuduException {
         this.update(getDefaultDataBase(),table,data);
     }
+    @Override
     public void update(String dbName,String table, Object data) throws KuduException {
         kuduTemplate.update(getFinalTableName(dbName,table),data);
     }
 
+    @Override
     public void upsert(String table, Object data) throws KuduException {
         this.upsert(getDefaultDataBase(),table,data);
     }
+    @Override
     public void upsert(String dbName,String table, Object data) throws KuduException {
         kuduTemplate.upsert(getFinalTableName(dbName,table),data);
     }
 
 
 
+    @Override
     public String getDefaultDataBase() {
         return Optional.ofNullable(defaultDataBase)
                 .orElseThrow(() -> new DefaultDBNotFoundException(

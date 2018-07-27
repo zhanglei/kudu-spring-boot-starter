@@ -63,7 +63,7 @@ public class PlainKuduTemplate implements KuduTemplate {
      * 所以
      * @return 所有库的所有表，即 kudu 中的所有表
      */
-
+    @Override
     public List<String> getTablesList(){
         try {
             return kuduClient.getTablesList().getTablesList();
@@ -78,6 +78,7 @@ public class PlainKuduTemplate implements KuduTemplate {
      * @param operations
      * @throws KuduException
      */
+    @Override
     public void apply(List<Operation> operations) throws KuduException {
         int index = 0;
         for(Operation operation : operations){
@@ -98,12 +99,14 @@ public class PlainKuduTemplate implements KuduTemplate {
      * @param operation
      * @throws KuduException
      */
+    @Override
     public void apply(Operation operation) throws KuduException {
         kuduSession.apply(operation);
         kuduSession.flush();
     }
 // -----------------------------------------------------
 
+    @Override
     public KuduTable getTable(String tableName) throws KuduException {
 
         KuduTable table = tables.get(tableName);
@@ -113,7 +116,7 @@ public class PlainKuduTemplate implements KuduTemplate {
         }
         return table;
     }
-
+    @Override
     public Insert createInsert(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
         Insert insert = ktable.newInsert();
@@ -128,40 +131,46 @@ public class PlainKuduTemplate implements KuduTemplate {
      * @return
      * @throws KuduException
      */
+    @Override
     public Update createUpdate(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
         Update update = ktable.newUpdate();
         this.fillData(data, ktable, update);
         return update;
     }
-
+    @Override
+    /**
+     * 删除
+     */
     public Delete createDelete(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
         Delete delete = ktable.newDelete();
         this.fillData(data, ktable, delete);
         return delete;
     }
-
+    @Override
     public Upsert createUpsert(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
         Upsert upsert = ktable.newUpsert();
         this.fillData(data, ktable, upsert);
         return upsert;
     }
-
+    @Override
     public void delete(String table, Object data) throws KuduException {
         Delete delete = this.createDelete(table, data);
         this.apply(delete);
     }
-
+    @Override
     public void insert(String table, Object data) throws KuduException {
         Insert insert = this.createInsert(table, data);
         this.apply(insert);
     }
+    @Override
     public void update(String table, Object data) throws KuduException {
         Update update = this.createUpdate(table, data);
         this.apply(update);
     }
+    @Override
     public void upsert(String table, Object data) throws KuduException {
         Upsert upsert = this.createUpsert(table, data);
         this.apply(upsert);

@@ -112,11 +112,12 @@ public class PlainKuduTemplate implements KuduTemplate {
      * @param responses
      */
     private void printResposse(List<OperationResponse> responses){
-        for (OperationResponse response : responses) {
-            if (response.getRowError() != null) {
-                //表示失败！
-                log.error("kudu 请求失败！tips={}",response.getRowError());
-            }
+        if(responses == null || responses.isEmpty()){
+            return;
+        }
+        List<RowError> rowErrors = OperationResponse.collectErrors(responses);
+        if(!rowErrors.isEmpty()){
+            log.error("kudu {}条操作请求失败！tips={}",rowErrors.size(),rowErrors);
         }
     }
 // -----------------------------------------------------

@@ -13,6 +13,7 @@ import org.sj4axao.stater.kudu.utils.IdGenerator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,18 +81,20 @@ public class PlainKuduTemplate implements KuduTemplate {
      */
     @Override
     public void apply(List<Operation> operations) throws KuduException {
+        long start = System.currentTimeMillis();
         int index = 0;
         for(Operation operation : operations){
             try {
                 kuduSession.apply(operation);
                 if( ++index % 8 == 0){
-                    kuduSession.flush();
+                    printResposse(kuduSession.flush());
                 }
             }catch (Exception e){
                 e.printStackTrace();
             }
         }
-        kuduSession.flush();
+        printResposse(kuduSession.flush());
+        log.info("kudu 请求条数={}条，处理时间={} ms",operations.size(),System.currentTimeMillis()-start);
     }
 
     /**
@@ -101,8 +104,20 @@ public class PlainKuduTemplate implements KuduTemplate {
      */
     @Override
     public void apply(Operation operation) throws KuduException {
-        kuduSession.apply(operation);
-        kuduSession.flush();
+        this.apply(Collections.singletonList(operation));
+    }
+
+    /**
+     * 打印失败的结果
+     * @param responses
+     */
+    private void printResposse(List<OperationResponse> responses){
+        for (OperationResponse response : responses) {
+            if (response.getRowError() != null) {
+                //表示失败！
+                log.error("kudu 请求失败！tips={}",response.getRowError());
+            }
+        }
     }
 // -----------------------------------------------------
 
@@ -178,7 +193,7 @@ public class PlainKuduTemplate implements KuduTemplate {
     //---------------------------------------------------------
 
     /**
-     *
+     * 为数据赋值到 operation 中
      * @param data
      * @param ktable
      * @param operation

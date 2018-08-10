@@ -1,6 +1,22 @@
 ﻿# README
 
-`kuduUtil`
+`kudu` `SpringBootStarter`
+
+> 本项目是对 KuduClient 的封装，将常用操作封装为一个两个Template,用于在Spring配置文件中简单配置即可使用。
+
+#### 使用流程：
+1. 下载源码 maven 打包为jar包，deploy 至公司私服或 install 至本地仓库
+2. pom 中引用
+```xml
+<dependency>
+	<groupId>org.sj4axao</groupId>
+	<artifactId>kudu-spring-boot-starter</artifactId>
+	<!-- version 选择 源码中 pom 的最新版本 -->
+	<version>***</version>
+</dependency>		
+```
+3. 根据下述配置，在 yml 或 properties 中配置好
+4. 根据注入下述注入方法在代码中直接注入即可使用
 
 ---
 **必要配置:**
@@ -20,22 +36,36 @@ kudu:
 ```
 **注入:**
 ```java
-//todo
+    /**
+    * 用于操作 impala 创建的 kudu 表
+    * impala 会生成特定的表名，并有DB的概念
+    * 如：用impala在test库内创建user表 则kudu中真实的表名为 impala::test.user
+    */
+    @Autowired
+    KuduImpalaTemplate kuduImpalaTemplate;
+    /**
+    * 用于操作 kudu 原生的表
+    */
+    @Autowired
+    KuduTemplate kuduTemplate;
 // 当然可以直接注入 KuduClient 和 KuduSession 来使用原生 api
 ```
+---
+tips：
+-
+1. 
 
 ---
 versions
 -
 - 1.0.0-SNAPSHOT 1.0快照版，提供基本增删改查功能
 - 1.1.0-SNAPSHOT 
-> + 增加Long类型的ID生成器,雪花算法
-> + 增加兼容多 DB 的重载方法，默认仍然是 ***
-> + 增加 upsert 方法
+    + 增加Long类型的ID生成器,雪花算法
+    + 增加兼容多 DB 的重载方法，默认仍然是 ***
+    + 增加 upsert 方法
 
 - 2.0.0-SNAPSHOT 业务代码剥离
-   + 分为 KuduTemplate 和 KuduImpalaTemplate 对外提供服务
-
+    + 分为 KuduTemplate 和 KuduImpalaTemplate 对外提供服务
 
 ---
 other

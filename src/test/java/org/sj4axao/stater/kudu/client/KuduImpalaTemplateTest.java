@@ -27,6 +27,8 @@ public class KuduImpalaTemplateTest {
 
     @Autowired
     KuduImpalaTemplate kuduImpalaTemplate;
+    @Autowired
+    KuduTemplate kuduTemplate;
 
     @Test
     public void insertDefaultDB() throws KuduException {
@@ -51,105 +53,12 @@ public class KuduImpalaTemplateTest {
         Schema schema = user.getSchema();
         log.info("name={}",schema.getColumn("name"));
     }
-
     @Test
-    public void getId(){
-        System.out.println(kuduImpalaTemplate.getId());
+    public void delete() throws KuduException {
+        User user = new User();
+        user.setId(6L);
+        kuduImpalaTemplate.delete("user",user);
     }
 
-    @Test
-    public void getTablesList() {
-    }
 
-    @Test
-    public void getTable() {
-    }
-
-    @Test
-    public void getTable1() {
-    }
-
-    @Test
-    public void scanId() {
-    }
-
-    @Test
-    public void scanId1() {
-    }
-
-    @Test
-    public void createInsert() {
-    }
-
-    @Test
-    public void createInsert1() {
-    }
-
-    @Test
-    public void createUpdate() {
-    }
-
-    @Test
-    public void createUpdate1() {
-    }
-
-    @Test
-    public void createDelete() {
-    }
-
-    @Test
-    public void createDelete1() {
-    }
-
-    @Test
-    public void createUpsert() {
-    }
-
-    @Test
-    public void apply() {
-    }
-
-    @Test
-    public void apply1() {
-    }
-
-    @Test
-    public void createUpsert1() {
-    }
-
-    @Test
-    public void delete() {
-    }
-
-    @Test
-    public void delete1() {
-    }
-
-    @Test
-    public void insert() {
-    }
-
-    @Test
-    public void insert1() {
-    }
-
-    @Test
-    public void update() {
-    }
-
-    @Test
-    public void update1() {
-    }
-
-    @Test
-    public void upsert() {
-    }
-
-    @Test
-    public void upsert1() {
-    }
-
-    @Test
-    public void getDefaultDataBase() {
-    }
 }

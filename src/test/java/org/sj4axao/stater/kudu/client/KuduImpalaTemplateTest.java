@@ -7,10 +7,8 @@ import org.apache.kudu.client.KuduException;
 import org.apache.kudu.client.KuduTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sj4axao.stater.kudu.client.impl.PlainKuduImpalaTemplate;
 import org.sj4axao.stater.kudu.demo.DemoApplication;
 import org.sj4axao.stater.kudu.demo.bean.User;
-import org.sj4axao.stater.kudu.demo.dao.KuduImpalaTemplateDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -57,6 +55,7 @@ public class KuduImpalaTemplateTest {
     public void delete() throws KuduException {
         User user = new User();
         user.setId(4L);
+        user.setSex(4);
         kuduImpalaTemplate.delete("user",user);
     }
 

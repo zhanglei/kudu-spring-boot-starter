@@ -26,7 +26,9 @@ public interface KuduTemplate {
 
     void apply(List<Operation> operations) throws KuduException;
     void apply(Operation operation) throws KuduException;
+
     //---------------- 单条操作 ----------------
+
     void delete(String table, Object data) throws KuduException;
     void insert(String table, Object data) throws KuduException;
     void update(String table, Object data) throws KuduException;

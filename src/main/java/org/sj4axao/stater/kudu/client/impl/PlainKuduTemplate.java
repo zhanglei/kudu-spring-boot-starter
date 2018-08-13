@@ -201,7 +201,8 @@ public class PlainKuduTemplate implements KuduTemplate {
      * @param data
      */
     private void  fillData(Object data,KuduTable ktable,Operation operation){
-        JSON.toJSONString(data);
+        String changeType = getChangeType(operation);
+        boolean delete = "DELETE".equals(changeType);
         PartialRow row = operation.getRow();
         Schema schema = ktable.getSchema();
         Map<String, ColumnSchema> cols = getCols(schema);
@@ -217,6 +218,7 @@ public class PlainKuduTemplate implements KuduTemplate {
                     // 没有该字段，跳过
                     continue;
                 }
+
                 Object value = null;
                 try {
                     value = method.invoke(data);
@@ -230,11 +232,36 @@ public class PlainKuduTemplate implements KuduTemplate {
                     // 不过这样会导致无法设置某个字段值为 null
                     continue;
                 }
+                if(delete && !columnSchema.isKey()){
+                    log.info("删除操作需要且仅需要 主键字段，{}字段不是主键，已跳过该字段！",columnSchema.getName());
+                    continue;
+                }
                 // 赋值
                 fillCol(row,columnSchema,value);
             }
         }
 
+    }
+
+    /**
+     * get
+     * @param operation
+     * @return
+     */
+    private String getChangeType(Operation operation) {
+        try {
+            Method method = operation.getClass().getDeclaredMethod("getChangeType");
+            method.setAccessible(true);
+            String changeType = method.invoke(operation).toString();
+            return changeType;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

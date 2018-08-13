@@ -54,7 +54,7 @@ public class KuduImpalaTemplateTest {
     @Test
     public void delete() throws KuduException {
         User user = new User();
-        user.setId(4L);
+        user.setId(6L);
         user.setSex(4);
         kuduImpalaTemplate.delete("user",user);
     }

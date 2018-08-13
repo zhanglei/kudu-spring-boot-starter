@@ -53,7 +53,9 @@ kudu:
 ---
 tips：
 -
-1. 
+1. insert、update、delete 字段的匹配模式是，找到传入的实体对象的所有 public get 方法，然后去掉get以后的方法名作为属性名，将属性名和 kudu 中的字段名全部去掉 "_"(下划线) 然后 变小写之后，进行比较一致的就认为是同一个字段，进行赋值
+2. createTable 暂时没有封装，可以注入 kuduClient 调用 createTable 方法进行操作。
+3. 当传入的data实体中值为 null 的字段会被跳过，也就是说无法将一个字段的值更新为 null
 
 ---
 versions

@@ -4,10 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Schema;
 import org.apache.kudu.Type;
-import org.apache.kudu.client.CreateTableOptions;
-import org.apache.kudu.client.KuduClient;
-import org.apache.kudu.client.KuduException;
-import org.apache.kudu.client.KuduTable;
+import org.apache.kudu.client.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sj4axao.stater.kudu.demo.DemoApplication;
@@ -15,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,5 +59,35 @@ public class KuduClientTest {
     @Test
     public void delTable() throws KuduException {
         log.info("{}",kuduClient.deleteTable("wgj.apiTest"));
+    }
+
+    @Test
+    public void scan() throws KuduException {
+        KuduTable table = kuduClient.openTable("impala::test.user");
+        KuduScanner.KuduScannerBuilder scanner = kuduClient.newScannerBuilder(table);
+
+        //指定返回字段
+        List<String> returnColumns = new ArrayList<>();
+
+        for (ColumnSchema columnSchema : table.getSchema().getColumns()) {
+            returnColumns.add(columnSchema.getName());
+        }
+
+
+        //组装条件
+        KuduPredicate predicate = KuduPredicate.newComparisonPredicate(table.getSchema().getColumn("name"),
+                KuduPredicate.ComparisonOp.EQUAL, "jason");
+        scanner.addPredicate(predicate);
+        System.out.println(KuduPredicate.ComparisonOp.EQUAL);
+
+        KuduScanner build = scanner.build();
+        while (build.hasMoreRows()) {
+            RowResultIterator results = build.nextRows();
+            while (results.hasNext()) {
+                RowResult result = results.next();
+                log.info("{}",result);
+                System.out.println(result.getLong(0));
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@ import org.apache.kudu.Type;
 import org.apache.kudu.client.*;
 import org.sj4axao.stater.kudu.client.KuduTemplate;
 import org.sj4axao.stater.kudu.config.KuduProperties;
+import org.sj4axao.stater.kudu.enums.OperationType;
 import org.sj4axao.stater.kudu.utils.IdGenerator;
 
 import java.lang.reflect.InvocationTargetException;
@@ -135,9 +136,7 @@ public class PlainKuduTemplate implements KuduTemplate {
     @Override
     public Insert createInsert(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
-        Insert insert = ktable.newInsert();
-        this.fillData(data, ktable, insert);
-        return insert;
+        return (Insert) this.fillData(data, ktable, OperationType.INSERT);
     }
 
     /**
@@ -150,26 +149,22 @@ public class PlainKuduTemplate implements KuduTemplate {
     @Override
     public Update createUpdate(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
-        Update update = ktable.newUpdate();
-        this.fillData(data, ktable, update);
-        return update;
+        return (Update) this.fillData(data, ktable, OperationType.UPDATE);
     }
-    @Override
+
     /**
      * 删除
      */
+    @Override
     public Delete createDelete(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
-        Delete delete = ktable.newDelete();
-        this.fillData(data, ktable, delete);
-        return delete;
+        return (Delete) this.fillData(data, ktable, OperationType.DELETE);
     }
     @Override
     public Upsert createUpsert(String table, Object data) throws KuduException {
         KuduTable ktable = this.getTable(table);
-        Upsert upsert = ktable.newUpsert();
-        this.fillData(data, ktable, upsert);
-        return upsert;
+        return (Upsert) this.fillData(data, ktable, OperationType.UPSERT);
+
     }
     @Override
     public void delete(String table, Object data) throws KuduException {
@@ -197,12 +192,14 @@ public class PlainKuduTemplate implements KuduTemplate {
      * 为数据赋值到 operation 中
      * @param data
      * @param ktable
-     * @param operation
+     * @param type
      * @param data
      */
-    private void  fillData(Object data,KuduTable ktable,Operation operation){
-        String changeType = getChangeType(operation);
-        boolean delete = "DELETE".equals(changeType);
+    private Operation  fillData(Object data, KuduTable ktable, OperationType type){
+
+        boolean delete = OperationType.DELETE.equals(type);
+        Operation operation = createOperation(ktable, type);
+
         PartialRow row = operation.getRow();
         Schema schema = ktable.getSchema();
         Map<String, ColumnSchema> cols = getCols(schema);
@@ -240,28 +237,35 @@ public class PlainKuduTemplate implements KuduTemplate {
                 fillCol(row,columnSchema,value);
             }
         }
-
+        return operation;
     }
 
     /**
-     * get
+     *
+     * @param ktable
+     * @param type
      * @param operation
      * @return
      */
-    private String getChangeType(Operation operation) {
-        try {
-            Method method = operation.getClass().getDeclaredMethod("getChangeType");
-            method.setAccessible(true);
-            String changeType = method.invoke(operation).toString();
-            return changeType;
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+    private Operation createOperation(KuduTable ktable, OperationType type) {
+        Operation operation = null;
+        switch (type){
+            case INSERT:
+                operation = ktable.newInsert();
+                break;
+            case UPDATE:
+                operation = ktable.newUpdate();
+                break;
+            case UPSERT:
+                operation = ktable.newUpsert();
+                break;
+            case DELETE:
+                operation = ktable.newDelete();
+                break;
+            default:
+                break;
         }
-        return null;
+        return operation;
     }
 
     /**

@@ -2,7 +2,6 @@ package org.sj4axao.stater.kudu.demo.dao;
 
 import org.apache.kudu.client.KuduException;
 import org.sj4axao.stater.kudu.client.KuduImpalaTemplate;
-import org.sj4axao.stater.kudu.client.impl.PlainKuduImpalaTemplate;
 import org.sj4axao.stater.kudu.demo.bean.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

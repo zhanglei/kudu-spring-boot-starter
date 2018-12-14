@@ -24,12 +24,13 @@ import java.util.List;
  * @description:
  */
 @Configuration
+//@EnableConfigurationProperties(KuduProperties.class)
 public class KuduClientAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(KuduClientAutoConfiguration.class);
 
     @Bean
-    @ConditionalOnProperty(value = "kudu.kuduAddress")
+    @ConditionalOnProperty(value = "kudu.kudu-address")
     public KuduProperties kuduProperties(){
         return new KuduProperties();
     }

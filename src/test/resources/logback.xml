@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:noNamespaceSchemaLocation="http://www.padual.com/java/logback.xsd"
+		debug="false" scan="true" scanPeriod="30 second">
+
+	<!--<springProperty name="topic" source="logging.kafka.topic" defaultValue="topic"/>
+	<springProperty name="system" source="logging.kafka.system"  defaultValue="system"/>
+	<springProperty name="servers" source="logging.kafka.servers" />
+	<springProperty name="basePath" source="logging.basePath" defaultValue="/data/logs"/>-->
+
+	<property name="pattern" value="ts-%d %5p %20.20t [%X{TID}] %m [%c] %n"/>
+
+	<!-- 文件日志 -->
+	<appender name="rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/data/logs/kudu-spring-boot-stater/%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>10</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>${pattern}</pattern>
+		</encoder>
+		<!--<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>-->
+	</appender>
+
+	<!--<appender neverBlock="true"  name="KafkaAppender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+		<encoder class="com.github.danielwegener.logback.kafka.encoding.LayoutKafkaMessageEncoder">
+			<layout class="net.logstash.logback.layout.LogstashLayout" >
+			 	<includeMdcKeyName>TID</includeMdcKeyName>
+				&lt;!&ndash; <includeContext>true</includeContext>
+				<includeCallerData>true</includeCallerData> &ndash;&gt;
+				<customFields>{"system":"${system}"}</customFields>
+				<fieldNames class="net.logstash.logback.fieldnames.ShortenedFieldNames"/>
+			</layout>
+		</encoder>
+		<topic>${topic}</topic>
+		<deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+		<producerConfig>bootstrap.servers=${servers}</producerConfig>
+	</appender>
+
+	&lt;!&ndash; 异步输出 &ndash;&gt;
+	<appender name ="ASYNC" class= "ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref ="KafkaAppender"/>
+		<neverBlock>true</neverBlock>
+	</appender>  -->
+
+	<!-- 控制台打印 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder charset="utf-8">
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+	<!-- SQL相关日志输出-->
+	<logger name="org.springframework" level="INFO"/>
+	<logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>
+	<logger name="org.springframework.jdbc.core.StatementCreatorUtils" level="Trace"/>
+
+	<logger name="org.hibernate.validator" level="INFO"/>
+
+	<logger name="org.mybatis.spring.mapper.ClassPathMapperScanner" level="INFO"/>
+	<logger name="org.mybatis.spring.SqlSessionFactoryBean" level="INFO"/>
+	<logger name="org.mybatis.spring.SqlSessionUtils" level="INFO"/>
+	<logger name="org.mybatis.spring.transaction.SpringManagedTransaction" level="INFO"/>
+
+	<logger name="com.stumbleupon.async" level="INFO"/>
+	<logger name="org.apache.http" level="INFO"/>
+	<logger name="org.apache.kudu.client" level="INFO"/>
+
+	<logger name="org.jboss.logging" level="INFO"/>
+
+	<logger name="com.netflix" level="INFO"/>
+	<logger name="org.apache.tomcat.util" level="INFO"/>
+	<logger name="org.apache.catalina" level="INFO"/>
+	<logger name="sun.rmi" level="INFO"/>
+	<logger name="javax.management" level="INFO"/>
+	<logger name="javax.security" level="INFO"/>
+	<logger name="com.zaxxer.hikari.pool.HikariPool" level="INFO"/>
+	<logger name="com.common.performance.dao.SysPerformanceLogDao" level="INFO"/>
+	<logger name="org.apache.kafka" level="WARN"/>
+
+
+	<root level="TRACE">
+		<appender-ref ref="STDOUT"/>
+		<!-- <appender-ref ref="ASYNC" />
+		<appender-ref ref="rollingFileAppender"/>-->
+	</root>
+
+
+</configuration>

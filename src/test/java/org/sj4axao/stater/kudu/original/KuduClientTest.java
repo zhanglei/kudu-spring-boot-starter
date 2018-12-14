@@ -7,7 +7,7 @@ import org.apache.kudu.Type;
 import org.apache.kudu.client.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sj4axao.stater.kudu.demo.DemoApplication;
+import org.sj4axao.stater.kudu.DemoApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;

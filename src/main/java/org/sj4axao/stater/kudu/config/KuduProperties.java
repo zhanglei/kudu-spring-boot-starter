@@ -2,8 +2,6 @@ package org.sj4axao.stater.kudu.config;
 
 import com.sun.istack.internal.NotNull;
 import lombok.Data;
-import org.apache.kudu.client.KuduClient;
-import org.apache.kudu.client.KuduSession;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**

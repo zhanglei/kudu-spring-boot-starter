@@ -15,6 +15,11 @@ public interface KuduTemplate {
 
     KuduTable getTable(String tableName)  throws KuduException;
 
+    /**
+     * 获取主键列list,名称为大写
+     * @param tableName 表名
+     */
+    List<String> getKeyColumns(String tableName) throws KuduException;
     //--------------------- return Operation 用于批量操作(apply) -------------
     Insert createInsert(String table, Object data) throws KuduException;
 
@@ -25,6 +30,8 @@ public interface KuduTemplate {
     Upsert createUpsert(String table, Object data) throws KuduException;
 
     void apply(List<Operation> operations) throws KuduException;
+
+    List<OperationResponse> apply(List<Operation> operations,int flushSize) throws KuduException;
     void apply(Operation operation) throws KuduException;
 
     //---------------- 单条操作 ----------------

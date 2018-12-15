@@ -84,7 +84,7 @@
 	<logger name="org.apache.kafka" level="WARN"/>
 
 
-	<root level="TRACE">
+	<root level="DEBUG">
 		<appender-ref ref="STDOUT"/>
 		<!-- <appender-ref ref="ASYNC" />
 		<appender-ref ref="rollingFileAppender"/>-->

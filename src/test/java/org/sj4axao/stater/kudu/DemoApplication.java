@@ -1,4 +1,4 @@
-package org.sj4axao.stater.kudu.demo;
+package org.sj4axao.stater.kudu;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

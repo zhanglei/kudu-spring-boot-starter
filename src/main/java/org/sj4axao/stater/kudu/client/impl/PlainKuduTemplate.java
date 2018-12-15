@@ -24,6 +24,7 @@ import org.sj4axao.stater.kudu.utils.IdGenerator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,15 +42,14 @@ public class PlainKuduTemplate implements KuduTemplate {
     KuduProperties kuduProperties;
 
     private IdGenerator idGenerator;
-    private static Map<String, KuduTable> tables;
+    private static Map<String, KuduTable> tables = new HashMap<>();
+    private static Map<String, List<String>> tablesKeys = new HashMap<>();
 
     public PlainKuduTemplate(KuduClient kuduClient, KuduSession kuduSession, KuduProperties kuduProperties) {
         this.kuduClient = kuduClient;
         this.kuduSession = kuduSession;
         this.kuduProperties = kuduProperties;
 
-        // 初始化 id 生成器
-        tables = new HashMap<>();
         Long wordId = kuduProperties.getWorkerId();
         log.info("默认workId ={},本节点的 workId = {}", KuduProperties.DEFAULT_WORK_ID, wordId);
         idGenerator = new IdGenerator(wordId);
@@ -99,7 +99,7 @@ public class PlainKuduTemplate implements KuduTemplate {
         for (Operation operation : operations) {
             try {
                 kuduSession.apply(operation);
-                if (++index % 8 == 0) {
+                if (++index % 16 == 0) {
                     printResposse(kuduSession.flush());
                 }
             } catch (Exception e) {
@@ -108,6 +108,34 @@ public class PlainKuduTemplate implements KuduTemplate {
         }
         printResposse(kuduSession.flush());
         log.info("kudu 请求条数={}条，处理时间={} ms", operations.size(), System.currentTimeMillis() - start);
+    }
+
+    /**
+     * @param operations 操作记录列表
+     * @param flushSize  每次刷新记录数
+     * @throws KuduException
+     */
+    @Override
+    public List<OperationResponse> apply(List<Operation> operations, int flushSize) throws KuduException {
+        long start = System.currentTimeMillis();
+        int index = 0;
+        List<OperationResponse> operationResponseList = new ArrayList<>();
+        for (Operation operation : operations) {
+            try {
+                kuduSession.apply(operation);
+                if (++index % flushSize == 0) {
+                    operationResponseList.addAll(kuduSession.flush());
+                    index = 0;
+                }
+            } catch (Exception e) {
+                log.error("调用kudu api发生异常", e);
+            }
+        }
+        if (index > 0) {
+            operationResponseList.addAll(kuduSession.flush());
+        }
+        log.info("kudu 请求条数={}条，flushSize={},返回结果长度={},处理时间={} ms", operations.size(), flushSize, operationResponseList.size(), System.currentTimeMillis() - start);
+        return operationResponseList;
     }
 
     /**
@@ -138,14 +166,25 @@ public class PlainKuduTemplate implements KuduTemplate {
 // -----------------------------------------------------
 
     @Override
-    public KuduTable getTable(String tableName) throws KuduException {
-
-        KuduTable table = tables.get(tableName);
-        if (table == null) {
-            table = kuduClient.openTable(tableName);
+    public synchronized KuduTable getTable(String tableName) throws KuduException {
+        if (!tables.containsKey(tableName)) {
+            KuduTable table = kuduClient.openTable(tableName);
             tables.put(tableName, table);
         }
-        return table;
+        return tables.get(tableName);
+    }
+
+    @Override
+    public synchronized List<String> getKeyColumns(String tableName) throws KuduException {
+        if (!tablesKeys.containsKey(tableName)) {
+            KuduTable table = getTable(tableName);
+            List<String> keys = new ArrayList<>();
+            for (ColumnSchema keyColumn : table.getSchema().getPrimaryKeyColumns()) {
+                keys.add(keyColumn.getName().toUpperCase());
+            }
+            tablesKeys.put(tableName, keys);
+        }
+        return tablesKeys.get(tableName);
     }
 
     @Override
@@ -226,14 +265,14 @@ public class PlainKuduTemplate implements KuduTemplate {
         Map<String, ColumnSchema> cols = getCols(schema);
 
         if (data instanceof Map) {
-            Map<String,Object> dataMap = (Map<String,Object>)data;
+            Map<String, Object> dataMap = (Map<String, Object>) data;
 
             for (String key : dataMap.keySet()) {
                 //去掉 _ 且转为小写,从 cols 里面匹配字段
                 ColumnSchema columnSchema = cols.get(transColName(key));
                 if (columnSchema != null) {
                     if (delete && !columnSchema.isKey()) {
-                        log.info("删除操作需要且仅需要 主键字段，{}字段不是主键，已跳过该字段！", columnSchema.getName());
+                        log.trace("删除操作需要且仅需要 主键字段，{}字段不是主键，已跳过该字段！", columnSchema.getName());
                     } else {
                         // 赋值
                         fillCol(row, columnSchema, dataMap.get(key));
@@ -312,7 +351,7 @@ public class PlainKuduTemplate implements KuduTemplate {
      * @param schema
      * @return
      */
-    private Map<String, ColumnSchema> getCols(Schema schema) {
+    public Map<String, ColumnSchema> getCols(Schema schema) {
         Map<String, ColumnSchema> data = new HashMap<>();
         for (ColumnSchema columnSchema : schema.getColumns()) {
             data.put(transColName(columnSchema.getName()), columnSchema);

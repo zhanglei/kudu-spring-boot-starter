@@ -19,4 +19,17 @@ public class KuduProperties {
 
     // 对于操作 impala 创建的 kudu 表，存在 DB 概念
     private String defaultDataBase;
+
+    /**
+     *  keytab文件
+     */
+    private String kerberosKeytab;
+    /**
+     * keytab文件对应的用户
+     */
+    private String kerberosPrincipal;
+    /**
+     * krb5是否开启debug
+     */
+    private boolean kerberosDebug = false;
 }

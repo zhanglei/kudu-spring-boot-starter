@@ -56,35 +56,12 @@
 		</encoder>
 	</appender>
 	<!-- SQL相关日志输出-->
-	<logger name="org.springframework" level="INFO"/>
 	<logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>
 	<logger name="org.springframework.jdbc.core.StatementCreatorUtils" level="Trace"/>
-
-	<logger name="org.hibernate.validator" level="INFO"/>
-
-	<logger name="org.mybatis.spring.mapper.ClassPathMapperScanner" level="INFO"/>
-	<logger name="org.mybatis.spring.SqlSessionFactoryBean" level="INFO"/>
-	<logger name="org.mybatis.spring.SqlSessionUtils" level="INFO"/>
-	<logger name="org.mybatis.spring.transaction.SpringManagedTransaction" level="INFO"/>
-
-	<logger name="com.stumbleupon.async" level="INFO"/>
-	<logger name="org.apache.http" level="INFO"/>
-	<logger name="org.apache.kudu.client" level="INFO"/>
-
-	<logger name="org.jboss.logging" level="INFO"/>
-
-	<logger name="com.netflix" level="INFO"/>
-	<logger name="org.apache.tomcat.util" level="INFO"/>
-	<logger name="org.apache.catalina" level="INFO"/>
-	<logger name="sun.rmi" level="INFO"/>
-	<logger name="javax.management" level="INFO"/>
-	<logger name="javax.security" level="INFO"/>
-	<logger name="com.zaxxer.hikari.pool.HikariPool" level="INFO"/>
-	<logger name="com.common.performance.dao.SysPerformanceLogDao" level="INFO"/>
 	<logger name="org.apache.kafka" level="WARN"/>
 
 
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="STDOUT"/>
 		<!-- <appender-ref ref="ASYNC" />
 		<appender-ref ref="rollingFileAppender"/>-->

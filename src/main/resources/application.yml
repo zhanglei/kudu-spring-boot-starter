@@ -4,10 +4,8 @@ spring:
 
 kudu:
   # 必要
-  kudu-address: cdhtest03.weichai.com
+  kudu-address: cdhdev01.weichai.com
   # 如果多节点使用getId方法获取全局唯一id，最好配，默认 35，取值范围 [0,1024）
   worker-id: 1
   #使用KuduImpalaTemplate来操作Impala创建的Kudu表则最好设置默认DB，否则必须使用带dbName参数的重载方法
   default-data-base: default
-#  kerberos-keytab: /home/dft/module/cert/zhihuiyun.keytab
-  kerberos-principal: zhihuiyun
